@@ -1,0 +1,211 @@
+/* ================= HEADER ================= */
+.header {
+  gap: 4px;
+  height: 50px;
+  background: #2f3f9e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  color: #fff;
+}
+
+/* ---------- LEFT ---------- */
+.left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  height: 32px;
+  border-radius: 5px;
+}
+
+.title {
+  color: #fff !important;
+  margin: 0 !important;
+  font-weight: 700;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  :global {
+    .ant-dropdown-menu-item,
+    .ant-dropdown-menu {
+      padding: 0 !important;
+    }
+  }
+}
+
+/* ---------- CENTER ---------- */
+.centerTitle {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.pageTitle {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 480px;
+  text-align: center;
+}
+
+.user {
+  color: #fff;
+}
+
+.aiAgentDrawer {
+  :global(.ant-drawer-header) {
+    display: flex;
+    align-items: center;
+  }
+  :global(.ant-drawer-title) {
+    order: 1;
+    flex: 1;
+  }
+  :global(.ant-drawer-close) {
+    order: 2; /* đặt nút close sau title để nằm bên phải */
+    margin-left: 8px;
+  }
+}
+
+.transparentSelect {
+  :global(.ant-select-selector) {
+    background-color: transparent !important;
+    border-color: #ffffff80; // tùy chỉnh
+    color: #fff;
+  }
+
+  :global(.ant-select-selection-item),
+  :global(.ant-select-arrow) {
+    color: #fff;
+  }
+}
+
+.transparentBtn {
+  background-color: transparent !important;
+  border-color: #ffffff80;
+  color: #fff;
+
+  &:hover,
+  &:focus {
+    background: #ffffff1a;
+    border-color: #ffffffcc;
+  }
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 12px;
+    height: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* LEFT: chỉ logo */
+  .left {
+    gap: 6px;
+  }
+
+  .logo {
+    height: 24px;
+  }
+
+  .title {
+    display: none; /* ẨN TEXT LOGO */
+  }
+
+  /* CENTER: ẨN PAGE TITLE */
+  .centerTitle {
+    display: none;
+  }
+
+  /* RIGHT: icon only */
+  .right {
+    gap: 8px;
+  }
+
+  .transparentBtn span {
+    display: none;
+  }
+}
+
+/* ---------- AI AGENT BUTTON & ANIMATION ---------- */
+.aiButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  transition: color 0.3s ease;
+
+  :global(.anticon-robot) {
+    font-size: 18px;
+    transition:
+      transform 0.6s ease,
+      text-shadow 0.6s ease;
+  }
+
+  &:hover {
+    color: #e0f2fe;
+  }
+
+  &:hover :global(.anticon-robot) {
+    transform: translateY(-1px) scale(1.05);
+    text-shadow: 0 0 6px rgba(129, 230, 217, 0.85);
+  }
+}
+
+.aiDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+  animation:
+    ai-pulse-ring 1.6s ease-out infinite,
+    ai-soft-glow 3s ease-in-out infinite;
+}
+
+@keyframes ai-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+    transform: scale(1);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(52, 211, 153, 0);
+    transform: scale(1.5);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
+    transform: scale(1);
+  }
+}
+
+@keyframes ai-soft-glow {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .aiButton {
+    gap: 4px;
+  }
+}

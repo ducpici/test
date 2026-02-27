@@ -1,0 +1,36 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: rgba(229, 231, 235);
+}
+
+a {
+  font-weight: 500;
+  color: #1677ff;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #0958d9;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* Override Ant Design Tabs nav padding */
+:where(.css-dev-only-do-not-override-mncuj7).ant-tabs-top > .ant-tabs-nav {
+  margin: 0 !important;
+}

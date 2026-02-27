@@ -1,0 +1,24 @@
+.container {
+  :global {
+    .ant-segmented {
+      padding: 3.25px;
+      background-color: #f3f4f6;
+    }
+    .ant-segmented-item-label {
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+    }
+    .ant-segmented-item-selected {
+      box-shadow:
+        0px 1px 2px -1px rgba(0, 0, 0, 0.1),
+        0px 1px 3px 0px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+.labelLang {
+  display: none;
+  @media (min-width: 768px) {
+    display: block;
+  }
+}
