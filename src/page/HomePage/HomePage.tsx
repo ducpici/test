@@ -26,12 +26,30 @@ export const HomePage = () => {
   const [ids, setIds] = useState("");
 
   const handleDeleteToken = () => {
+    if (!localStorage.getItem(TOKEN_STORAGE_KEY)) {
+      message.warning("Không có dữ liệu để xóa");
+      return;
+    }
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken("");
     message.success("Đã xóa token");
   };
 
+  const handleDeleteAll = () => {
+    if (!localStorage.getItem(HISTORY_STORAGE_KEY)) {
+      message.warning("Không có dữ liệu để xóa");
+      return;
+    }
+    localStorage.removeItem(HISTORY_STORAGE_KEY);
+    setHistory([]);
+    message.success("Đã xóa hết dữ liệu");
+  };
+
   const handleSaveToken = () => {
+    if (!ids) {
+      message.warning("Chưa nhập token");
+      return;
+    }
     localStorage.setItem(TOKEN_STORAGE_KEY, token);
     setIsTokenModalOpen(false);
   };
@@ -49,6 +67,7 @@ export const HomePage = () => {
       "Đơn vị": item.weightUnit,
       "Vật liệu": item.enTexture,
       "Kích thước": item.boundaryDimension,
+      "Thông số kỹ thuật và modal": item.groes,
     }));
 
     // Tạo worksheet
@@ -304,35 +323,45 @@ export const HomePage = () => {
   return (
     <div className={styles.assemblyFormPage}>
       <div className={styles.mainContainer} style={{ gap: "10px" }}>
-        <Flex gap={10}>
-          <Input
-            placeholder="Nhập ID cách nhau bằng dấu ,"
-            value={ids}
-            onChange={(e) => setIds(e.target.value)}
-            onPressEnter={handleSearch}
-          />
+        <div className={styles.header}>
+          <div className={styles.headerRow}>
+            <Input
+              placeholder="Nhập ID cách nhau 1 khoảng trắng"
+              value={ids}
+              onChange={(e) => setIds(e.target.value)}
+              onPressEnter={handleSearch}
+            />
+            <div className={styles.buttonGroup}>
+              <Button
+                style={{ backgroundColor: "#0026ff", color: "white" }}
+                onClick={handleSearch}
+              >
+                Tìm kiếm
+              </Button>
 
-          <Button
-            style={{ backgroundColor: "#0026ff", color: "white" }}
-            onClick={handleSearch}
-          >
-            Tìm
-          </Button>
+              <Button
+                style={{ backgroundColor: "#0026ff", color: "white" }}
+                onClick={handleExportExcel}
+              >
+                Xuất Excel
+              </Button>
 
-          <Button
-            style={{ backgroundColor: "#0026ff", color: "white" }}
-            onClick={handleExportExcel}
-          >
-            Xuất
-          </Button>
+              <Button
+                style={{ backgroundColor: "#0026ff", color: "white" }}
+                onClick={() => setIsTokenModalOpen(true)}
+              >
+                QL Token
+              </Button>
 
-          <Button
-            style={{ backgroundColor: "#0026ff", color: "white" }}
-            onClick={() => setIsTokenModalOpen(true)}
-          >
-            Token
-          </Button>
-        </Flex>
+              <Button
+                style={{ backgroundColor: "#0026ff", color: "white" }}
+                onClick={handleDeleteAll}
+              >
+                Xóa tất cả
+              </Button>
+            </div>
+          </div>
+        </div>
 
         <div className={styles.assemblyTableWrapper}>
           <Table

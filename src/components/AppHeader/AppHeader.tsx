@@ -88,9 +88,12 @@ export const AppHeader: React.FC = () => {
         <img
           src={reactLogo}
           className={styles.logo}
-          onClick={() => navigate("/page/projects")}
+          onClick={() => navigate("/")}
           style={{ cursor: "pointer" }}
         />
+        <Typography.Title level={4} className={styles.title}>
+          ADMIN
+        </Typography.Title>
       </div>
 
       {/* Right */}
