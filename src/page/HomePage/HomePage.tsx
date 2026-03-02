@@ -46,7 +46,7 @@ export const HomePage = () => {
   };
 
   const handleSaveToken = () => {
-    if (!ids) {
+    if (!token) {
       message.warning("Chưa nhập token");
       return;
     }
