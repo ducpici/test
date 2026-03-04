@@ -5,6 +5,7 @@ import { Input, Button, Flex, Table, Space, Tag, Modal, message } from "antd";
 import { ClockCircleOutlined, DeleteColumnOutlined } from "@ant-design/icons";
 import "@ant-design/v5-patch-for-react-19";
 import * as XLSX from "xlsx";
+import { useTranslation } from "react-i18next";
 interface DataEntry {
   materialCode: string;
   materialDescription: string;
@@ -20,10 +21,73 @@ const TOKEN_STORAGE_KEY = "sanny_token";
 const HISTORY_STORAGE_KEY = "sanny_history";
 
 export const HomePage = () => {
+  const { t } = useTranslation();
   const [history, setHistory] = useState<DataEntry[]>([]);
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [token, setToken] = useState("");
   const [ids, setIds] = useState("");
+  const containsChinese = (text: string) => /[\u3400-\u9FBF]/.test(text);
+  const textureMap: Record<string, string> = {
+    钢质: "Steel",
+  };
+  const textureCache = new Map<string, string>();
+  const translateToVi = async (text: string) => {
+    const res = await fetch("/api/translate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text,
+        to: "vi",
+      }),
+    });
+
+    const data = await res.json();
+    return data.translatedText;
+  };
+
+  const translateToViByGoogleTranslate = async (text: string) => {
+    const res = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh&tl=vi&dt=t&q=${encodeURIComponent(text)}`,
+    );
+
+    const data = await res.json();
+    return data[0][0][0];
+  };
+
+  const translateToEnByGoogleTranslate = async (text: string) => {
+    const res = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh&tl=en&dt=t&q=${encodeURIComponent(text)}`,
+    );
+
+    const data = await res.json();
+    return data[0][0][0];
+  };
+  const getTranslatedTexture = async (raw: string) => {
+    const texture = raw.trim();
+
+    if (!texture) return "";
+
+    // 1️⃣ Có trong map
+    if (textureMap[texture]) {
+      return textureMap[texture];
+    }
+
+    // 2️⃣ Có trong cache
+    if (textureCache.has(texture)) {
+      return textureCache.get(texture)!;
+    }
+
+    // 3️⃣ Gọi API dịch
+    try {
+      const translated = await translateToEnByGoogleTranslate(texture);
+      textureCache.set(texture, translated);
+      return translated;
+    } catch {
+      return texture; // fallback nếu lỗi
+    }
+  };
 
   const handleDeleteToken = () => {
     if (!localStorage.getItem(TOKEN_STORAGE_KEY)) {
@@ -63,6 +127,7 @@ export const HomePage = () => {
     // Chuyển data sang dạng JSON thuần
     const exportData = history.map((item) => ({
       Mã: item.materialCode,
+      Tên: item.materialDescription,
       "Cân nặng": item.weight,
       "Đơn vị": item.weightUnit,
       "Vật liệu": item.enTexture,
@@ -100,53 +165,6 @@ export const HomePage = () => {
         .filter(Boolean);
 
       message.loading({ content: "Đang tìm...", key: "search" });
-
-      // const response = await fetch(
-      //   "/api/api-gateway/bom-server/dimpart/getDimRdPartsStyleDf",
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //       Authorization: savedToken,
-      //       "authorization-userid": "1679596610662825985",
-      //     },
-      //     body: JSON.stringify({
-      //       languageType: "vi",
-      //       materialCode: ids,
-      //       userId: "1679596610662825985",
-      //     }),
-      //   },
-      // );
-
-      // if (!response.ok) {
-      //   throw new Error("API error");
-      // }
-
-      // const result = await response.json();
-
-      // const cleanedData: DataEntry[] = [
-      //   {
-      //     materialCode: result.data.baseInfo.materialCode ?? "",
-      //     weight: result.data.mdmInfo.weight ?? "",
-      //     weightUnit: result.data.baseInfo.weightUnit ?? "",
-      //     enTexture: result.data.mdmInfo.enTexture ?? "",
-      //     boundaryDimension: result.data.mdmInfo.boundaryDimension ?? "",
-      //   },
-      // ];
-
-      // setHistory((prev) => {
-      //   // tránh trùng materialCode
-      //   const merged = [
-      //     ...prev.filter(
-      //       (item) => item.materialCode !== cleanedData[0].materialCode,
-      //     ),
-      //     ...cleanedData,
-      //   ];
-
-      //   localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(merged));
-
-      //   return merged;
-      // });
 
       const cleanToken = savedToken.replace(/^Bearer\s+/i, "");
       // Gọi API song song
@@ -197,19 +215,84 @@ export const HomePage = () => {
       }
 
       // Transform dữ liệu
-      const cleanedData: DataEntry[] = validResponses.map((result) => {
-        const source = result.data ?? {};
-        return {
-          materialCode: source.baseInfo?.materialCode ?? "",
-          materialDescription: source.mdmInfo?.materialDescription ?? "",
-          weight: source.mdmInfo?.weight ?? "",
-          weightUnit: result.data.baseInfo.weightUnit ?? "",
-          enTexture: source.mdmInfo?.enTexture ?? "",
-          boundaryDimension: source.mdmInfo?.boundaryDimension ?? "",
-          specificationName: source.mdmdmInfo?.specificationName ?? "",
-          groes: source.baseInfo?.groes ?? "",
-        };
-      });
+      // const cleanedData: DataEntry[] = validResponses.map((result) => {
+      //   const source = result.data ?? {};
+      //   return {
+      //     materialCode: source.baseInfo?.materialCode ?? "",
+      //     materialDescription: source.mdmInfo?.materialDescription ?? "",
+      //     weight: source.mdmInfo?.weight ?? "",
+      //     weightUnit: result.data.baseInfo.weightUnit ?? "",
+      //     enTexture: source.mdmInfo?.enTexture ?? "",
+      //     boundaryDimension: source.mdmInfo?.boundaryDimension ?? "",
+      //     specificationName: source.mdmdmInfo?.specificationName ?? "",
+      //     groes: source.baseInfo?.groes ?? "",
+      //   };
+      // });
+
+      // const cleanedData: DataEntry[] = await Promise.all(
+      //   validResponses.map(async (result) => {
+      //     const source = result.data ?? {};
+
+      //     let texture = source.mdmInfo?.enTexture ?? "";
+
+      //     // 🔥 chỉ dịch nếu là tiếng Trung
+      //     if (texture && containsChinese(texture)) {
+      //       texture = await translateToEnByGoogleTranslate(texture);
+      //     }
+
+      //     return {
+      //       materialCode: source.baseInfo?.materialCode ?? "",
+      //       materialDescription: source.mdmInfo?.materialDescription ?? "",
+      //       weight: source.mdmInfo?.weight ?? "",
+      //       weightUnit: source.baseInfo?.weightUnit ?? "",
+      //       enTexture: texture,
+      //       boundaryDimension: source.mdmInfo?.boundaryDimension ?? "",
+      //       specificationName: source.mdmInfo?.specificationName ?? "",
+      //       groes: source.baseInfo?.groes ?? "",
+      //     };
+      //   }),
+      // );
+
+      const cleanedData: DataEntry[] = await Promise.all(
+        validResponses.map(async (result) => {
+          const source = result.data ?? {};
+
+          let texture = (source.mdmInfo?.texture ?? "").trim();
+
+          if (texture && containsChinese(texture)) {
+            // 🔥 Nếu có trong map thì dùng luôn
+            if (textureMap[texture]) {
+              texture = textureMap[texture];
+            }
+            // 🔁 Nếu có trong cache
+            else if (textureCache.has(texture)) {
+              texture = textureCache.get(texture)!;
+            }
+            // 🌍 Nếu chưa có thì gọi API dịch
+            else {
+              try {
+                const translated =
+                  await translateToEnByGoogleTranslate(texture);
+                textureCache.set(texture, translated);
+                texture = translated;
+              } catch {
+                // nếu lỗi thì giữ nguyên
+              }
+            }
+          }
+
+          return {
+            materialCode: source.baseInfo?.materialCode ?? "",
+            materialDescription: source.mdmInfo?.materialDescription ?? "",
+            weight: source.mdmInfo?.weight ?? "",
+            weightUnit: source.baseInfo?.weightUnit ?? "",
+            enTexture: texture,
+            boundaryDimension: source.mdmInfo?.boundaryDimension ?? "",
+            specificationName: source.mdmInfo?.specificationName ?? "",
+            groes: source.baseInfo?.groes ?? "",
+          };
+        }),
+      );
 
       // Merge + tránh trùng
       setHistory((prev) => {
@@ -250,49 +333,49 @@ export const HomePage = () => {
   const columns: ColumnsType<DataEntry> = useMemo(
     () => [
       {
-        title: "Mã",
+        title: t("table.field.materialCode"),
         dataIndex: "materialCode",
         key: "materialCode",
         render: (value: string) => <b>{value}</b>,
       },
       {
-        title: "Tên",
+        title: t("table.field.name"),
         dataIndex: "materialDescription",
         key: "materialDescription",
         render: (value: string) => <b>{value}</b>,
       },
       {
-        title: "Cân nặng",
+        title: t("table.field.weight"),
         dataIndex: "weight",
         key: "weight",
         render: (value: string) => <span>{value} </span>,
       },
       {
-        title: "Đơn vị",
+        title: t("table.field.weightUnit"),
         dataIndex: "weightUnit",
         key: "weightUnit",
         render: (value: string) => <span>{value} </span>,
       },
       {
-        title: "Vật liệu",
+        title: t("table.field.texture"),
         dataIndex: "enTexture",
         key: "enTexture",
         render: (value: string) => <span>{value}</span>,
       },
       {
-        title: "Kích thước",
+        title: t("table.field.boundaryDimension"),
         dataIndex: "boundaryDimension",
         key: "boundaryDimension",
         render: (value: string) => <span>{value}</span>,
       },
       {
-        title: "Thông số kỹ thuật và model",
+        title: t("table.field.groes"),
         dataIndex: "groes",
         key: "groes",
         render: (value: string) => <span>{value}</span>,
       },
       {
-        title: "Hành động",
+        title: t("action.label"),
         fixed: "right",
         render: (_: any, record: DataEntry) => (
           <Button
@@ -312,12 +395,12 @@ export const HomePage = () => {
               });
             }}
           >
-            Delete
+            {t("action.delete")}
           </Button>
         ),
       },
     ],
-    [history],
+    [history, t],
   );
 
   return (
@@ -336,28 +419,28 @@ export const HomePage = () => {
                 style={{ backgroundColor: "#0026ff", color: "white" }}
                 onClick={handleSearch}
               >
-                Tìm kiếm
+                {t("action.search")}
               </Button>
 
               <Button
                 style={{ backgroundColor: "#0026ff", color: "white" }}
                 onClick={handleExportExcel}
               >
-                Xuất Excel
+                {t("action.export")}
               </Button>
 
               <Button
                 style={{ backgroundColor: "#0026ff", color: "white" }}
                 onClick={() => setIsTokenModalOpen(true)}
               >
-                QL Token
+                {t("action.mngToken")}
               </Button>
 
               <Button
                 style={{ backgroundColor: "#0026ff", color: "white" }}
                 onClick={handleDeleteAll}
               >
-                Xóa tất cả
+                {t("action.delete")}
               </Button>
             </div>
           </div>
@@ -386,13 +469,13 @@ export const HomePage = () => {
         onCancel={() => setIsTokenModalOpen(false)}
         footer={[
           <Button key="delete" danger onClick={handleDeleteToken}>
-            Xóa token
+            {t("action.delete")} {t("entity.token")}
           </Button>,
           <Button key="cancel" onClick={() => setIsTokenModalOpen(false)}>
-            Hủy
+            {t("action.cancel")}
           </Button>,
           <Button key="save" type="primary" onClick={handleSaveToken}>
-            Lưu
+            {t("action.save")}
           </Button>,
         ]}
       >
@@ -405,7 +488,7 @@ export const HomePage = () => {
 
         {token && (
           <div style={{ marginTop: 8, fontSize: 12, color: "#52c41a" }}>
-            Token hiện tại đã được lưu
+            {t("message.tokenSaved")}
           </div>
         )}
       </Modal>

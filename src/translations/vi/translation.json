@@ -1,0 +1,37 @@
+{
+  "action": {
+    "label": "Hành động",
+    "search": "Tìm kiếm",
+    "mngToken": "QL Token",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "delete": "Xóa",
+    "export": "Xuất"
+  },
+  "entity": {
+    "data": "Dữ liệu",
+    "token": "Token",
+    "id": "ID"
+  },
+  "message": {
+    "noDataTo": "Không có dữ liệu để {{action}}.",
+    "allDataDeleted": "Tất cả dữ liệu đã được xóa.",
+    "deletedEntity": "Đã xóa {{entity}}",
+    "pleaseEnterEntity": "Vui lòng nhập {{entity}}",
+    "tokenExpired": "Token đã hết hạn, vui lòng đăng nhập lại.",
+    "findSuccess": "Tìm kiếm thành công",
+    "noDataFound": "Không tìm thấy dữ liệu.",
+    "tokenSaved": "Token hiện tại đã được lưu."
+  },
+  "table": {
+    "field": {
+      "materialCode": "Mã",
+      "name": "Tên",
+      "weight": "Cân nặng",
+      "weightUnit": "Đơn vị",
+      "texture": "Vật liệu",
+      "boundaryDimension": "Kích thước",
+      "groes": "Thông số kỹ thuật và mô-đun"
+    }
+  }
+}

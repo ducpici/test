@@ -1,0 +1,37 @@
+{
+  "action": {
+    "label": "Actions",
+    "search": "Search",
+    "mngToken": "Manage Token",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "export": "Export"
+  },
+  "entity": {
+    "data": "Data",
+    "token": "Token",
+    "id": "ID"
+  },
+  "message": {
+    "noDataTo": "No data to {{action}}.",
+    "allDataDeleted": "All data has been deleted.",
+    "deletedEntity": "{{entity}} deleted",
+    "pleaseEnterEntity": "Please enter {{entity}}",
+    "tokenExpired": "Token has expired, please log in again.",
+    "findSuccess": "Find success",
+    "noDataFound": "No data found.",
+    "tokenSaved": "The current token has been saved."
+  },
+  "table": {
+    "field": {
+      "materialCode": "Code",
+      "name": "Name",
+      "weight": "Weight",
+      "weightUnit": "Unit",
+      "texture": "Material",
+      "boundaryDimension": "Dimensions",
+      "groes": "Specifications and Module"
+    }
+  }
+}
